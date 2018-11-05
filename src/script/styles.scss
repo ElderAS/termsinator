@@ -1,0 +1,237 @@
+$border-radius: 3px;
+$limit: 1000px;
+$primary: #2364aa;
+$grey: #f6f6f6;
+$gutterize: 10px;
+
+.termsinator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: rgba(black, 0.7);
+
+  font-size: 16px;
+
+  &,
+  *,
+  *:before,
+  *:after {
+    box-sizing: border-box;
+  }
+
+  &__modal {
+    font: inherit;
+    color: inherit;
+    background-color: white;
+    border-radius: $border-radius;
+    overflow-y: auto;
+
+    width: 100%;
+    height: 100%;
+    max-width: $limit;
+    max-height: $limit;
+
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: $limit) {
+      border-radius: 0;
+    }
+  }
+
+  object {
+    background-color: lighten($grey, 2%);
+    width: 100%;
+    min-height: 40vh;
+    border-top: 2px solid darken($grey, 10%);
+    border-bottom: 2px solid darken($grey, 10%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    z-index: 1;
+
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+      /* IE10+ CSS styles go here */
+      padding: 4em 2em;
+      min-height: auto;
+    }
+  }
+
+  &__doc-fallback {
+    background-color: transparent;
+    border: 2px solid #aaa;
+    color: inherit;
+    text-decoration: none;
+    border-radius: $border-radius;
+    padding: 1em 1.5em;
+    font: inherit;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background-color: $grey;
+    }
+  }
+
+  &__header {
+    padding: 2em;
+  }
+
+  &__title {
+    margin: 0;
+  }
+
+  &__date {
+    opacity: 0.75;
+    font-size: 0.8em;
+    margin-bottom: 0.5em;
+  }
+
+  &__changelog {
+    margin: 0;
+    padding: 0 0 0 0.5em;
+    border-left: 2px solid darken($grey, 10%);
+  }
+
+  &__message {
+    margin: 0;
+  }
+
+  &__branding {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: -$gutterize;
+    margin-bottom: 1em;
+
+    & > * {
+      margin: $gutterize;
+    }
+  }
+
+  &__logo {
+    height: 40px;
+    max-width: 100%;
+  }
+
+  &__actions {
+    padding: 2em;
+    background-color: $grey;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+
+    & > * {
+      margin: $gutterize;
+    }
+  }
+
+  &__button {
+    background-color: $primary;
+    color: white;
+    border-radius: $border-radius;
+    padding: 1em 1.5em;
+    font: inherit;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    // box-shadow: 0 15px 20px -10px rgba(0, 0, 0, 0.3);
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background-color: lighten($primary, 10%);
+    }
+
+    &--loading {
+      pointer-events: none;
+      background-color: darken($grey, 10%);
+      color: inherit;
+
+      &:after {
+        content: '';
+        display: block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid currentColor;
+        margin-left: 1em;
+        border-left-color: transparent;
+
+        animation: spin 500ms infinite linear;
+
+        @keyframes spin {
+          to {
+            transform: rotate(1turn);
+          }
+        }
+      }
+    }
+  }
+
+  &__checkbox {
+    input[type='checkbox'] {
+      opacity: 0;
+      position: absolute;
+      left: -9999px;
+
+      &:invalid:focus + label:before {
+        border-color: red;
+      }
+
+      &:checked + label {
+        &:before {
+          background: $primary;
+          border-color: $primary;
+          content: '✓';
+          color: #fff;
+          font-size: 1em;
+        }
+      }
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      line-height: 1;
+      font-weight: 400;
+
+      position: relative;
+
+      cursor: pointer;
+
+      &:before {
+        content: '';
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid #ccc;
+        flex-shrink: 0;
+        margin-right: 10px;
+        transition: background 0.1s ease-out;
+      }
+
+      &:empty:before {
+        margin-right: 0;
+      }
+
+      & ~ label {
+        margin-top: 0.5em;
+      }
+    }
+  }
+}
