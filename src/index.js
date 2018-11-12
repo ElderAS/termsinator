@@ -120,6 +120,7 @@ Termsinator.prototype.setServer = function(options = {}) {
 
   router.get('/script.js', (req, res, next) => {
     const url = new URL(this.options.server.endpoint, this.options.server.host)
+    res.setHeader('ContentType', 'text/javascript; charset=UTF-8')
     return res.send(Mustache.render(scriptContent, { base: url.href, ui: this.options.ui }))
   })
 
