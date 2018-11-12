@@ -33,24 +33,24 @@ const Modal = {
             CreateElement('h1', { innerText: '{{{ui.title}}}', className: 'termsinator__title' }),
             '{{{ui.logo}}}' ? CreateElement('img', { src: '{{{ui.logo}}}', className: 'termsinator__logo' }) : null,
           ]),
-          consent.current.metadata.message
-            ? CreateElement(
-                'blockquote',
-                {
-                  className: 'termsinator__changelog',
-                },
-                [
-                  CreateElement('div', {
-                    innerHTML: new Date(consent.current.metadata.date).toLocaleDateString(),
-                    className: 'termsinator__date',
-                  }),
-                  CreateElement('div', {
+          CreateElement(
+            'blockquote',
+            {
+              className: 'termsinator__changelog',
+            },
+            [
+              CreateElement('div', {
+                innerHTML: new Date(consent.current.metadata.date).toLocaleDateString(),
+                className: 'termsinator__date',
+              }),
+              consent.current.metadata.message
+                ? CreateElement('div', {
                     innerHTML: consent.current.metadata.message,
                     className: 'termsinator__message',
-                  }),
-                ],
-              )
-            : null,
+                  })
+                : null,
+            ],
+          ),
         ]),
         CreateElement(
           'object',
