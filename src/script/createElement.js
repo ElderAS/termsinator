@@ -9,7 +9,7 @@ export default function CreateElement(tag, options = {}, children = []) {
     })
 
   children = children instanceof Array ? children : [children]
-  children.forEach(child => el.appendChild(child))
+  children.filter(Boolean).forEach(child => el.appendChild(child))
 
   return el
 }
