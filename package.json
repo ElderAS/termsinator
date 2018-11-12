@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"No tests yest\"",
     "dev": "webpack --watch",
-    "build": "webpack",
+    "build": "webpack && git add dist/*",
     "travis-deploy-once": "travis-deploy-once",
     "semantic-release": "semantic-release"
   },
@@ -48,7 +48,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-push": "npm run build"
+      "pre-commit": "npm run build"
     }
   }
 }
