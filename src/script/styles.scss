@@ -14,10 +14,15 @@ $gutterize: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 2rem;
 
   background-color: rgba(black, 0.7);
 
   font-size: 16px;
+
+  @media (max-width: $limit) {
+    padding: 0;
+  }
 
   &,
   *,
@@ -28,7 +33,7 @@ $gutterize: 10px;
 
   &__modal {
     font: inherit;
-    color: inherit;
+    color: #222;
     background-color: white;
     border-radius: $border-radius;
     overflow-y: auto;
