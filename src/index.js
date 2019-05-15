@@ -39,8 +39,12 @@ function Termsinator() {
         .then(user => user.getConsent())
         .then(consent => {
           if (consent.current.status === 'accepted') return next()
-          const url = new URL(this.options.server.endpoint, this.options.server.host)
-          return res.send(Mustache.render(middlewareContent, { base: url.href, ui: this.options.ui }))
+          return res.send(
+            Mustache.render(middlewareContent, {
+              base: this.getURL(),
+              ui: this.options.ui,
+            }),
+          )
         })
         .catch(err => next(err))
     },
@@ -56,6 +60,11 @@ Termsinator.prototype.getLatestDocument = function() {
     .slice()
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .pop()
+}
+
+Termsinator.prototype.getURL = function() {
+  if (!this.options.server.host) return this.options.server.endpoint
+  return new URL(this.options.server.endpoint, this.options.server.host).href
 }
 
 Termsinator.prototype.resolveDocumentUrl = function(entry) {
@@ -119,9 +128,8 @@ Termsinator.prototype.setServer = function(options = {}) {
   })
 
   router.get('/script.js', (req, res, next) => {
-    const url = new URL(this.options.server.endpoint, this.options.server.host)
     res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
-    return res.send(Mustache.render(scriptContent, { base: url.href, ui: this.options.ui }))
+    return res.send(Mustache.render(scriptContent, { base: this.getURL(), ui: this.options.ui }))
   })
 
   instance.use(
