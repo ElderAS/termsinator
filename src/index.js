@@ -39,10 +39,11 @@ function Termsinator() {
         .then(user => user.getConsent())
         .then(consent => {
           if (consent.current.status === 'accepted') return next()
+          const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
           return res.send(
             Mustache.render(middlewareContent, {
               base: this.getURL(),
-              ui: this.options.ui,
+              ui,
             }),
           )
         })
@@ -129,7 +130,8 @@ Termsinator.prototype.setServer = function(options = {}) {
 
   router.get('/script.js', (req, res, next) => {
     res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
-    return res.send(Mustache.render(scriptContent, { base: this.getURL(), ui: this.options.ui }))
+    const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
+    return res.send(Mustache.render(scriptContent, { base: this.getURL(), ui }))
   })
 
   instance.use(

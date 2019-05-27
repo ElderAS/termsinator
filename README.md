@@ -146,6 +146,23 @@ ui: {
 }
 ```
 
+It is also possible to set ui with a function that has the request as first parameter. This allows for more dynamic content.
+
+Example:
+
+```js
+ui: req => {
+  // Do something like language resolving etc
+  return {
+    logo: 'https://myapp.com/logo',
+    title: 'Avtalevilkår',
+    termsLink: 'Les gjennom avtalevilkårene',
+    termsCheckbox: 'Jeg godtar avtalevilkårene',
+    submitButton: 'Send og godkjenn',
+  }
+}
+```
+
 #### documents
 
 Manage your terms & conditions, add new terms etc.
