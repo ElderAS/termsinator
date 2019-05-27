@@ -36,8 +36,9 @@ function Termsinator() {
     },
     middleware: () => (req, res, next) => {
       Promise.resolve(this.options.server.extractUser(req))
-        .then(user => user.getConsent())
-        .then(consent => {
+        .then(user => {
+          if (!user) return next()
+          let consent = user.getConsent()
           if (consent.current.status === 'accepted') return next()
           const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
           return res.send(
@@ -93,8 +94,10 @@ Termsinator.prototype.setServer = function(options = {}) {
 
   router.get('/', (req, res, next) => {
     Promise.resolve(extractUser(req))
-      .then(user => user.getConsent())
-      .then(consent => res.json(consent))
+      .then(user => {
+        if (!user) return res.sendStatus(204)
+        return res.json(user.getConsent())
+      })
       .catch(err => next(err))
   })
 
@@ -112,8 +115,8 @@ Termsinator.prototype.setServer = function(options = {}) {
 
   router.post('/', (req, res, next) => {
     Promise.resolve(extractUser(req))
-      .then(user => user.setConsent(req.body, true))
-      .then(() => res.sendStatus(200))
+      .then(user => user && user.setConsent(req.body, true))
+      .then(user => res.sendStatus(user ? 200 : 204))
       .catch(err => next(err))
   })
 
@@ -130,9 +133,14 @@ Termsinator.prototype.setServer = function(options = {}) {
   })
 
   router.get('/script.js', (req, res, next) => {
-    res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
-    const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
-    return res.send(Mustache.render(scriptContent, { base: this.getURL(), ui }))
+    Promise.resolve(extractUser(req))
+      .then(user => {
+        if (!user) return res.sendStatus(200)
+        res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
+        const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
+        return res.send(Mustache.render(scriptContent, { base: this.getURL(), ui }))
+      })
+      .catch(err => next(err))
   })
 
   instance.use(
@@ -198,7 +206,7 @@ Termsinator.prototype.setDatabase = function(options = {}) {
       date: new Date(),
     })
 
-    return save ? this.save() : true
+    return save ? this.save() : this
   }
 
   schema.methods.getConsent = function() {
