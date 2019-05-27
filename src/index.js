@@ -198,7 +198,7 @@ Termsinator.prototype.setDatabase = function(options = {}) {
       date: new Date(),
     })
 
-    return this.save()
+    return save ? this.save() : true
   }
 
   schema.methods.getConsent = function() {
