@@ -83,7 +83,8 @@ Termsinator.prototype.resolveDocumentEntry = function(entry) {
 }
 
 Termsinator.prototype.setUi = function(options = {}) {
-  Object.assign(this.options.ui, options)
+  if (typeof options === 'function') this.options.ui = options
+  else Object.assign(this.options.ui, options)
 }
 
 Termsinator.prototype.setServer = function(options = {}) {
