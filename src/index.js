@@ -135,8 +135,11 @@ Termsinator.prototype.setServer = function(options = {}) {
   router.get('/script.js', (req, res, next) => {
     Promise.resolve(extractUser(req))
       .then(user => {
-        if (!user) return res.sendStatus(200)
         res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
+        if (!user) {
+          res.status(204)
+          return res.send('// No user')
+        }
         const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
         return res.send(Mustache.render(scriptContent, { base: this.getURL(), ui }))
       })
