@@ -4,6 +4,7 @@ const router = require('express').Router()
 const cors = require('cors')
 const Mustache = require('mustache')
 const { URL } = require('url')
+const url = require('url')
 const fs = require('fs')
 const Defaults = require('./defaults')
 const validOptions = ['server', 'database', 'documents', 'ui']
@@ -104,13 +105,23 @@ Termsinator.prototype.setServer = function(options = {}) {
   router.get('/docs/latest', (req, res, next) => {
     let entry = this.getLatestDocument()
     if (!entry) return res.sendStatus(404)
-    return res.redirect(Utils.TrailingSlash(endpoint) + 'docs/' + entry.id)
+    return res.redirect(
+      url.format({
+        pathname: Utils.TrailingSlash(endpoint) + 'docs/' + entry.id,
+        query: req.query,
+      }),
+    )
   })
 
   router.get('/docs/latest/document', (req, res, next) => {
     let entry = this.getLatestDocument()
     if (!entry) return res.sendStatus(404)
-    return res.redirect(Utils.TrailingSlash(endpoint) + 'docs/' + entry.id + '/document')
+    return res.redirect(
+      url.format({
+        pathname: Utils.TrailingSlash(endpoint) + 'docs/' + entry.id + '/document',
+        query: req.query,
+      }),
+    )
   })
 
   router.post('/', (req, res, next) => {
