@@ -129,7 +129,8 @@ Termsinator.prototype.setServer = function(options = {}) {
   router.get('/docs/:id/document', (req, res, next) => {
     let entry = this.getDocumentById(req.params.id)
     if (!entry) return res.sendStatus(404)
-    return res.sendFile(path.resolve(entry.document))
+    let doc = typeof entry.document === 'function' ? entry.document(req) : entry.document
+    return res.sendFile(path.resolve(doc))
   })
 
   router.get('/script.js', (req, res, next) => {
