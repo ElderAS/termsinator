@@ -30,8 +30,16 @@ const Modal = {
       CreateElement('div', { className: 'termsinator__modal' }, [
         CreateElement('div', { className: 'termsinator__header' }, [
           CreateElement('div', { className: 'termsinator__branding' }, [
-            CreateElement('h1', { innerText: '{{{ui.title}}}', className: 'termsinator__title' }),
-            '{{{ui.logo}}}' ? CreateElement('img', { src: '{{{ui.logo}}}', className: 'termsinator__logo' }) : null,
+            CreateElement('h1', {
+              innerText: '{{{ui.title}}}',
+              className: 'termsinator__title',
+            }),
+            '{{{ui.logo}}}'
+              ? CreateElement('img', {
+                  src: '{{{ui.logo}}}',
+                  className: 'termsinator__logo',
+                })
+              : null,
           ]),
           CreateElement(
             'blockquote',
@@ -55,7 +63,7 @@ const Modal = {
         CreateElement(
           'object',
           {
-            data: consent.current.document,
+            data: `${consent.current.document}#toolbar=0`,
             type: 'application/pdf',
           },
           CreateElement('a', {
