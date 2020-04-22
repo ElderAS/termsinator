@@ -28,7 +28,7 @@ Termsinator.config({
     endpoint: '/terms-and-conditions',
     host: 'https://myapp.com',
     instance: INSTANCE, // Express instance
-    extractUser: function(req) {
+    extractUser: function (req) {
       /* Must return a mongoose document with the same 
          type as defined in `database.schema` options */
       return req.user
@@ -36,7 +36,7 @@ Termsinator.config({
   },
   database: {
     schema: userSchema,
-    setConsentOnCreate: function(doc) {
+    setConsentOnCreate: function (doc) {
       return false
     },
   },
@@ -74,7 +74,7 @@ Termsinator.config({
     endpoint: '/terms-and-conditions', // Your preferred endpoint for TAC management
     host: 'https://myapp.com', // Host address of your app
     instance: INSTANCE, // Express instance
-    extractUser: function(req) {
+    extractUser: function (req) {
       /* Must return a mongoose document with the same 
          type as defined in `database.schema` options */
       return req.user
@@ -93,7 +93,7 @@ It should look like this:
 Termsinator.config({
   database: {
     schema: userSchema, // Your user schema
-    setConsentOnCreate: function(doc) {
+    setConsentOnCreate: function (doc) {
       // Determine if consent should be set on creation, return true or false
       return false
     },
@@ -101,9 +101,11 @@ Termsinator.config({
 })
 ```
 
+**IMPORTANT**: If `setConsentOnCreate === true`, and the `id` on the `document` is a function, the `request` parameter is not supported and will be `undefined`
+
 `Termsinator` will expose the following methods on all of your user documents:
 
-`userDocument.getConsent()` -> return the current consent status and all historical consents
+`userDocument.getConsent(req)` -> return the current consent status and all historical consents
 
 ```js
 {
@@ -167,6 +169,22 @@ ui: req => {
 
 Manage your terms & conditions, add new terms etc.
 
+```js
+// Document object
+{
+	id: {String},
+	document: {String},
+	date: {String},
+	// optional
+	external: {Boolean},
+	message: {String}
+}
+```
+
+If `external === true`, the `document` property will be treated as a URL, not a path on disk
+
+All values on the `document` object can be replaced by a function that returns the expected value type. The function will recieve the express `request` object as parameter
+
 Example:
 
 ```js
@@ -177,8 +195,11 @@ Example:
     date: '2018-11-01T14:29:24.811Z',
   },
   {
-    id: '1.1.0',
-    document: '/terms/Terms-1-1-0.pdf', // Relative path (from project root) to file on disk
+    id: function (req) {
+      return req.client.term.id // This has to be a string
+    },
+    document: '/path/to/external/api',
+    external: true,
     message: 'Changes in usage of user properties',
     date: '2018-11-01T15:29:24.811Z',
   },
