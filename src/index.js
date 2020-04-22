@@ -39,7 +39,7 @@ function Termsinator() {
       Promise.resolve(this.options.server.extractUser(req))
         .then(user => {
           if (!user) return next()
-          let consent = user.getConsent()
+          let consent = user.getConsent(req)
           if (consent.current.status === 'accepted') return next()
           const ui = typeof this.options.ui === 'function' ? this.options.ui(req) : this.options.ui
           return res.send(
@@ -54,27 +54,45 @@ function Termsinator() {
   }
 }
 
-Termsinator.prototype.getDocumentById = function(id) {
+Termsinator.prototype.getDocumentById = function (id) {
   return this.options.documents.find(d => d.id === id)
 }
 
-Termsinator.prototype.getLatestDocument = function() {
-  return this.options.documents
+Termsinator.prototype.getLatestDocument = function (context) {
+  return this.getLatest(this.getDocuments(context))
+}
+
+Termsinator.prototype.resolveFunctionValues = function (obj = {}, ...args) {
+  let result = {}
+  for (let key in obj) {
+    let val = obj[key]
+    result[key] = typeof val === 'function' ? val(...args) : val
+  }
+  return result
+}
+
+Termsinator.prototype.getLatest = function (arr = []) {
+  return arr
     .slice()
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .pop()
 }
 
-Termsinator.prototype.getURL = function() {
+Termsinator.prototype.getURL = function () {
   if (!this.options.server.host) return this.options.server.endpoint
   return new URL(this.options.server.endpoint, this.options.server.host).href
 }
+Termsinator.prototype.getDocuments = function (context, id) {
+  let docs = this.options.documents.map(doc => this.resolveFunctionValues(doc, context))
+  if (id) docs = docs.find(doc => doc.id === id)
+  return docs
+}
 
-Termsinator.prototype.resolveDocumentUrl = function(entry) {
+Termsinator.prototype.resolveDocumentUrl = function (entry) {
   return Utils.TrailingSlash(this.options.server.endpoint) + 'docs/' + entry.id + '/document'
 }
 
-Termsinator.prototype.resolveDocumentEntry = function(entry) {
+Termsinator.prototype.resolveDocumentEntry = function (entry) {
   return {
     id: entry.id,
     status: entry.status,
@@ -84,12 +102,12 @@ Termsinator.prototype.resolveDocumentEntry = function(entry) {
   }
 }
 
-Termsinator.prototype.setUi = function(options = {}) {
+Termsinator.prototype.setUi = function (options = {}) {
   if (typeof options === 'function') this.options.ui = options
   else Object.assign(this.options.ui, options)
 }
 
-Termsinator.prototype.setServer = function(options = {}) {
+Termsinator.prototype.setServer = function (options = {}) {
   Object.assign(this.options.server, options)
   let { instance, extractUser, endpoint } = this.options.server
 
@@ -97,13 +115,13 @@ Termsinator.prototype.setServer = function(options = {}) {
     Promise.resolve(extractUser(req))
       .then(user => {
         if (!user) return res.sendStatus(204)
-        return res.json(user.getConsent())
+        return res.json(user.getConsent(req))
       })
       .catch(err => next(err))
   })
 
   router.get('/docs/latest', (req, res, next) => {
-    let entry = this.getLatestDocument()
+    let entry = this.getLatestDocument(req)
     if (!entry) return res.sendStatus(404)
     return res.redirect(
       url.format({
@@ -114,7 +132,7 @@ Termsinator.prototype.setServer = function(options = {}) {
   })
 
   router.get('/docs/latest/document', (req, res, next) => {
-    let entry = this.getLatestDocument()
+    let entry = this.getLatestDocument(req)
     if (!entry) return res.sendStatus(404)
     return res.redirect(
       url.format({
@@ -132,16 +150,16 @@ Termsinator.prototype.setServer = function(options = {}) {
   })
 
   router.get('/docs/:id', (req, res, next) => {
-    let entry = this.getDocumentById(req.params.id)
+    let entry = this.getDocuments(req, req.params.id)
     if (!entry) return res.sendStatus(404)
     return res.json(this.resolveDocumentEntry(entry))
   })
 
   router.get('/docs/:id/document', (req, res, next) => {
-    let entry = this.getDocumentById(req.params.id)
+    let entry = this.getDocuments(req, req.params.id)
     if (!entry) return res.sendStatus(404)
-    let doc = typeof entry.document === 'function' ? entry.document(req) : entry.document
-    return res.sendFile(path.resolve(doc))
+    if (entry.external) return res.redirect(entry.document)
+    return res.sendFile(path.resolve(entry.document))
   })
 
   router.get('/script.js', (req, res, next) => {
@@ -161,7 +179,7 @@ Termsinator.prototype.setServer = function(options = {}) {
   instance.use(
     Utils.TrailingSlash(endpoint),
     cors(),
-    function(req, res, next) {
+    function (req, res, next) {
       res.header('Cache-Control', 'no-cache')
       next()
     },
@@ -169,11 +187,11 @@ Termsinator.prototype.setServer = function(options = {}) {
   )
 }
 
-Termsinator.prototype.setDocuments = function(documents = []) {
+Termsinator.prototype.setDocuments = function (documents = []) {
   this.options.documents = documents
 }
 
-Termsinator.prototype.setDatabase = function(options = {}) {
+Termsinator.prototype.setDatabase = function (options = {}) {
   Object.assign(this.options.database, options)
   let { schema, setConsentOnCreate } = this.options.database
   let that = this
@@ -198,7 +216,7 @@ Termsinator.prototype.setDatabase = function(options = {}) {
     ],
   })
 
-  schema.pre('save', function(next) {
+  schema.pre('save', function (next) {
     Promise.resolve(setConsentOnCreate(this))
       .then(state => {
         if (!state) return next()
@@ -213,7 +231,7 @@ Termsinator.prototype.setDatabase = function(options = {}) {
       .catch(err => next())
   })
 
-  schema.methods.setConsent = function({ status, id }, save = false) {
+  schema.methods.setConsent = function ({ status, id }, save = false) {
     if (!this.termsinator) this.termsinator = []
     this.termsinator.push({
       id,
@@ -224,10 +242,10 @@ Termsinator.prototype.setDatabase = function(options = {}) {
     return save ? this.save() : this
   }
 
-  schema.methods.getConsent = function() {
+  schema.methods.getConsent = function (context) {
     let user = this
     let entries = user.termsinator ? user.termsinator.sort((a, b) => new Date(b.date) - new Date(a.date)) : []
-    let latest = that.getLatestDocument()
+    let latest = that.getLatestDocument(context)
     let { document, ...latest_rest } = latest
     let latestUserConsent = entries.find(entry => entry.id === latest.id)
 
