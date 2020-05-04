@@ -2,7 +2,7 @@
   "name": "termsinator",
   "version": "0.0.0-development",
   "description": "",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"No tests yest\"",
     "dev": "webpack --watch",

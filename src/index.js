@@ -263,4 +263,4 @@ Termsinator.prototype.setDatabase = function (options = {}) {
   }
 }
 
-module.exports = new Termsinator()
+module.exports = Termsinator
