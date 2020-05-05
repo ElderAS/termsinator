@@ -11,6 +11,8 @@ const API = {
   },
 }
 
+const ID = Math.random().toString(36).substr(2, 9)
+
 const Modal = {
   show(consent) {
     let el = CreateElement(
@@ -19,7 +21,7 @@ const Modal = {
         className: 'termsinator',
         onsubmit(event) {
           event.preventDefault()
-          let submit = document.querySelector('.termsinator__submit')
+          let submit = el.querySelector('.termsinator__submit')
           submit.classList.add('termsinator__button--loading')
           SetConsent(consent).then(() => {
             if (document.documentElement.getAttribute('termsinator-middleware')) window.location.reload()
@@ -78,11 +80,11 @@ const Modal = {
             CreateElement('input', {
               type: 'checkbox',
               required: true,
-              id: 'termsinator-consent',
+              id: 'termsinator-consent_' + ID,
             }),
             CreateElement('label', {
               type: 'checkbox',
-              for: 'termsinator-consent',
+              for: 'termsinator-consent_' + ID,
               innerText: '{{{ui.termsCheckbox}}}',
             }),
           ]),
