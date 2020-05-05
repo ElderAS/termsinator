@@ -1,6 +1,6 @@
 const Utils = require('./utils')
 const path = require('path')
-const router = require('express').Router()
+const express = require('express')
 const cors = require('cors')
 const Mustache = require('mustache')
 const { URL } = require('url')
@@ -110,6 +110,7 @@ Termsinator.prototype.setUi = function (options = {}) {
 Termsinator.prototype.setServer = function (options = {}) {
   Object.assign(this.options.server, options)
   let { instance, extractUser, endpoint } = this.options.server
+  let router = express.Router()
 
   router.get('/', (req, res, next) => {
     Promise.resolve(extractUser(req))
