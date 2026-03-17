@@ -113,7 +113,7 @@ Termsinator.prototype.setServer = function (options = {}) {
   let router = express.Router()
 
   const isUser = (req, res, next) => {
-    return extractUser(req).then(user => {
+    return Promise.resolve(extractUser(req)).then(user => {
       if (!user) return res.sendStatus(401)
       return next()
     })
