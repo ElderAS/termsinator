@@ -112,7 +112,14 @@ Termsinator.prototype.setServer = function (options = {}) {
   let { instance, extractUser, endpoint } = this.options.server
   let router = express.Router()
 
-  router.get('/', (req, res, next) => {
+  const isUser = (req, res, next) => {
+    return extractUser(req).then(user => {
+      if (!user) return res.sendStatus(401)
+      return next()
+    })
+  }
+
+  router.get('/', isUser, (req, res, next) => {
     Promise.resolve(extractUser(req))
       .then(user => {
         if (!user) return res.sendStatus(204)
@@ -121,7 +128,7 @@ Termsinator.prototype.setServer = function (options = {}) {
       .catch(err => next(err))
   })
 
-  router.get('/docs/latest', (req, res, next) => {
+  router.get('/docs/latest', isUser, (req, res, next) => {
     let entry = this.getLatestDocument(req)
     if (!entry) return res.sendStatus(404)
     return res.redirect(
@@ -132,7 +139,7 @@ Termsinator.prototype.setServer = function (options = {}) {
     )
   })
 
-  router.get('/docs/latest/document', (req, res, next) => {
+  router.get('/docs/latest/document', isUser, (req, res, next) => {
     let entry = this.getLatestDocument(req)
     if (!entry) return res.sendStatus(404)
     return res.redirect(
@@ -150,13 +157,13 @@ Termsinator.prototype.setServer = function (options = {}) {
       .catch(err => next(err))
   })
 
-  router.get('/docs/:id', (req, res, next) => {
+  router.get('/docs/:id', isUser, (req, res, next) => {
     let entry = this.getDocuments(req, req.params.id)
     if (!entry) return res.sendStatus(404)
     return res.json(this.resolveDocumentEntry(entry))
   })
 
-  router.get('/docs/:id/document', (req, res, next) => {
+  router.get('/docs/:id/document', isUser, (req, res, next) => {
     let entry = this.getDocuments(req, req.params.id)
     if (!entry) return res.sendStatus(404)
     if (entry.external) return res.redirect(entry.document)
